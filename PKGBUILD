@@ -58,7 +58,10 @@ source=(https://commondatastorage.googleapis.com/chromium-browser-official/chrom
         iwyu-add-stdint.h-for-various-int-types-in-comp.patch
         iwyu-add-stdint.h-for-various-integer-types-in-net.patch
         iwyu-add-cstdint-for-int-types-in-s2cellid.patch
-        random-fixes-for-gcc13.patch)
+        random-fixes-for-gcc13.patch
+        0001-widevine-support-for-arm.patch
+        0002-Run-blink-bindings-generation-single-threaded.patch
+        0003-Fix-eu-strip-build-for-newer-GCC.patch)
 sha256sums=('0def7cd594304d7675821d42a4207377af98e321a78a91ee5200aea55adc2d93'
             '1025329c38041b3b8b200fe3405d4b873345e87cba6333e036b83ad2f0000d3e'
             '213e50f48b67feb4441078d50b0fd431df34323be15be97c55302d3fdac4483a'
@@ -85,7 +88,10 @@ sha256sums=('0def7cd594304d7675821d42a4207377af98e321a78a91ee5200aea55adc2d93'
             '88320e0f08cc7b53807961d0735e7c1bd455a6faf9d8a5d056b7ba7809e37355'
             '5dfbfd073f78c887bbffca2b644116571cc9b1196867e44e8fc0cbb40afcf1bc'
             'd97dc00f66fa5868584e4b6d5ef817911eab2dc8022a37c75a00d063f4dac483'
-            'ba4dd0a25a4fc3267ed19ccb39f28b28176ca3f97f53a4e9f5e9215280040ea0')
+            'ba4dd0a25a4fc3267ed19ccb39f28b28176ca3f97f53a4e9f5e9215280040ea0'
+            '55354d76720cdf42ad3839b4291c20b2d6007aafd7ab6d61a342213dbbab7ef4'
+            '752dae1f9560c616e59d78147a8c2174ffc95298e82b52f27c6ae8f45f8ce015'
+            '86043061faf447cc6b67bbc09c5ec509ef4269052831d7c42b05d8f00feacd1e')
 
 # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
 # Keys are the names in the above script; values are the dependencies in Arch
@@ -125,6 +131,11 @@ prepare() {
   # Allow building against system libraries in official builds
   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
     tools/generate_shim_headers/generate_shim_headers.py
+
+  # Arch Linux ARM fixes
+  patch -p1 -i ../0001-widevine-support-for-arm.patch
+  patch -p1 -i ../0002-Run-blink-bindings-generation-single-threaded.patch
+  patch -p1 -i ../0003-Fix-eu-strip-build-for-newer-GCC.patch
 
   # https://crbug.com/893950
   sed -i -e 's/\<xmlMalloc\>/malloc/' -e 's/\<xmlFree\>/free/' \
@@ -250,7 +261,7 @@ build() {
   readarray -t -O ${#_flags[@]} _flags < "${_ungoogled_repo}/flags.gn"
 
   # See https://github.com/ungoogled-software/ungoogled-chromium-archlinux/issues/123
-  CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -fno-plt"
+  CFLAGS="-march=armv8-a -mtune=generic -O2 -pipe -fno-plt"
   CXXFLAGS="$CFLAGS"
 
   # Facilitate deterministic builds (taken from build/config/compiler/BUILD.gn)
