@@ -16,7 +16,7 @@ _launcher_ver=8
 _uc_usr=ungoogled-software
 _uc_ver=113.0.5672.126-1
 pkgdesc="A lightweight approach to removing Google web service dependency"
-arch=('x86_64')
+arch=('aarch64')
 url="https://github.com/ungoogled-software/ungoogled-chromium"
 license=('BSD')
 depends=('gtk3' 'nss' 'alsa-lib' 'xdg-utils' 'libxss' 'libcups' 'libgcrypt'
@@ -223,10 +223,10 @@ build() {
     export CCACHE_SLOPPINESS=time_macros
   fi
 
-  export CC=clang
-  export CXX=clang++
-  export AR=ar
-  export NM=nm
+  export CC="clang"
+  export CXX="clang++"
+  export AR="ar"
+  export NM="nm"
 
   local _flags=(
     'custom_toolchain="//build/toolchain/linux/unbundle:default"'
@@ -250,6 +250,10 @@ build() {
     'use_vaapi=true'
     'enable_platform_hevc=true'
     'enable_hevc_parser_and_hw_decoder=true'
+    'linux_use_bundled_binutils=false'
+    'clang_use_default_sample_profile=false'
+    'use_debug_fission=false'
+    'is_cfi=false'
   )
 
   if [[ -n ${_system_libs[icu]+set} ]]; then
@@ -261,7 +265,7 @@ build() {
   readarray -t -O ${#_flags[@]} _flags < "${_ungoogled_repo}/flags.gn"
 
   # See https://github.com/ungoogled-software/ungoogled-chromium-archlinux/issues/123
-  CFLAGS="-march=armv8-a -mtune=generic -O2 -pipe -fno-plt"
+  CFLAGS="-march=armv8.5-a -mcpu=apple-m1 -O2 -pipe -fno-plt"
   CXXFLAGS="$CFLAGS"
 
   # Facilitate deterministic builds (taken from build/config/compiler/BUILD.gn)
